@@ -3,7 +3,8 @@
   "version": "1.0.50",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "bun run --watch src/index.ts"
+    "dev": "bun run --watch src/index.ts",
+    "prisma-seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "5.22.0",
@@ -12,7 +13,9 @@
   },
   "devDependencies": {
     "bun-types": "latest",
-    "prisma": "^5.22.0"
+    "dayjs": "^1.11.13",
+    "prisma": "^5.22.0",
+    "tsx": "^4.19.2"
   },
   "module": "src/index.js"
 }

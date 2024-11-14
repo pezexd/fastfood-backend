@@ -5,7 +5,8 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["relationJoins"]
 }
 
 datasource db {
@@ -61,4 +62,121 @@ model Verification {
   expiresAt  DateTime
 
   @@map("verification")
+}
+
+enum OrderStatus {
+  REJECTED
+  PENDING
+  READY
+  DELIVERED
+  NOT_PAID
+  COMPLETED
+}
+
+enum UnitOfMeasure {
+  Gram
+  Milliliter
+  Ounce
+  Teaspoon
+  Tablespoon
+  Cup
+  Pinch
+  Dash
+  Whole
+  Slice
+  Leaf
+  Clove
+  Head
+  Bunch
+}
+
+model Order {
+  id               Int            @id @default(autoincrement())
+  status           OrderStatus    @default(PENDING)
+  createdAt        DateTime       @default(now())
+  customerFullName String
+  customerContact  String
+  items            OrderItem[]
+  payment          OrderPayment[]
+
+  @@map("order")
+}
+
+model PaymentMethod {
+  id           Int            @id @default(autoincrement())
+  name         String
+  description  String
+  OrderPayment OrderPayment[]
+
+  @@map("payment_method")
+}
+
+model Item {
+  id              Int              @id @default(autoincrement())
+  name            String
+  description     String
+  basePrice       Float
+  image           String
+  preparationTime Int
+  ingredients     ItemIngredient[]
+  orderItems      OrderItem[]
+
+  @@map("item")
+}
+
+model Ingredient {
+  id                             Int                             @id @default(autoincrement())
+  name                           String
+  quantity                       Float
+  additionalPrice                Float                           @default(0)
+  additionalQuantity             Float                           @default(0)
+  unit                           UnitOfMeasure
+  itemIngredients                ItemIngredient[]
+  orderItemAdditionalIngredients OrderItemAdditionalIngredient[]
+
+  @@map("ingredient")
+}
+
+model OrderItem {
+  id                    Int                             @id @default(autoincrement())
+  order                 Order                           @relation(fields: [orderId], references: [id])
+  orderId               Int
+  item                  Item                            @relation(fields: [itemId], references: [id])
+  itemId                Int
+  quantity              Int
+  additionalIngredients OrderItemAdditionalIngredient[]
+
+  @@map("order_item")
+}
+
+model OrderPayment {
+  id              Int           @id @default(autoincrement())
+  paymentMethod   PaymentMethod @relation(fields: [paymentMethodId], references: [id])
+  paymentMethodId Int
+  order           Order         @relation(fields: [orderId], references: [id])
+  orderId         Int
+  reference       String
+
+  @@map("order_payment")
+}
+
+model ItemIngredient {
+  id                 Int        @id @default(autoincrement())
+  item               Item       @relation(fields: [itemId], references: [id])
+  itemId             Int
+  ingredient         Ingredient @relation(fields: [ingredientId], references: [id])
+  ingredientId       Int
+  ingredientQuantity Float
+
+  @@map("item_ingredient")
+}
+
+model OrderItemAdditionalIngredient {
+  id           Int        @id @default(autoincrement())
+  orderItem    OrderItem  @relation(fields: [orderItemId], references: [id])
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
+  orderItemId  Int
+  ingredientId Int
+
+  @@map("order_item_additional_ingredient")
 }

@@ -1,5 +1,7 @@
 import { Context, Elysia } from "elysia";
 import { auth } from "./auth";
+import ordersRoutes from "./routes/orders";
+import itemsRoutes from "./routes/items";
 
 const betterAuthView = (context: Context) => {
   const BETTER_AUTH_ACCEPT_METHODS = ["POST", "GET"];
@@ -35,12 +37,14 @@ const userInfo = (user: User | null, session: Session | null) => {
     session: session,
   };
 };
+// .get("/user", ({ user, session }) => userInfo(user, session))
 
 const app = new Elysia()
   .derive(({ request }) => userMiddleware(request))
   .all("/api/auth/**", betterAuthView)
-  .get("/user", ({ user, session }) => userInfo(user, session))
-  .listen(5000);
+  .group("/api", (app) => app.use(ordersRoutes))
+  .group("/api", (app) => app.use(itemsRoutes))
+  .listen(8000);
 
 console.log(
   `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`
