@@ -23,7 +23,7 @@ export const OrderController = {
   /**
    * Getting all orders
    */
-  async findMany() {
+  async findMany(query: any) {
     try {
       const orders = await db.order.findMany({
         orderBy: { createdAt: "desc" },
@@ -35,6 +35,11 @@ export const OrderController = {
             },
           },
         },
+        ...(query.status && {
+          where: {
+            status: query.status,
+          },
+        }),
       });
 
       return orders.map(computedOrder);

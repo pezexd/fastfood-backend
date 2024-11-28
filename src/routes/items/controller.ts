@@ -4,6 +4,27 @@ import dayjs from "dayjs";
 
 export const ItemController = {
   /**
+   * Get items
+   */
+  async findMany() {
+    try {
+      const items = await db.item.findMany({
+        orderBy: { name: "desc" },
+        include: {
+          ingredients: {
+            include: {
+              ingredient: true,
+            },
+          },
+        },
+      });
+
+      return items;
+    } catch (e: unknown) {
+      console.error(`Error getting orders: ${e}`);
+    }
+  },
+  /**
    *  Get items with trends
    */
   async findTrends() {

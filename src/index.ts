@@ -1,7 +1,9 @@
 import { Context, Elysia } from "elysia";
+import { cors } from "@elysiajs/cors";
 import { auth } from "./auth";
 import ordersRoutes from "./routes/orders";
 import itemsRoutes from "./routes/items";
+import ingredientRoutes from "./routes/ingredients";
 
 const betterAuthView = (context: Context) => {
   const BETTER_AUTH_ACCEPT_METHODS = ["POST", "GET"];
@@ -44,6 +46,12 @@ const app = new Elysia()
   .all("/api/auth/**", betterAuthView)
   .group("/api", (app) => app.use(ordersRoutes))
   .group("/api", (app) => app.use(itemsRoutes))
+  .group("/api", (app) => app.use(ingredientRoutes))
+  .use(
+    cors({
+      origin: true,
+    })
+  )
   .listen(8000);
 
 console.log(

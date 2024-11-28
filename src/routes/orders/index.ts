@@ -3,7 +3,7 @@ import { OrderModel } from "./model";
 import { OrderController } from "./controller";
 
 const ordersRoutes = new Elysia({ prefix: "/orders" })
-  .get("/", () => OrderController.findMany())
+  .get("/", ({ query }) => OrderController.findMany(query))
   .get("/:id", ({ params: { id } }) => OrderController.findOne(id), {
     params: t.Object({
       id: t.Numeric(),
