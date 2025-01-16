@@ -19,19 +19,16 @@ const ordersRoutes = new Elysia({ prefix: "/orders" })
       params: t.Object({
         id: t.Numeric(),
       }),
-      body: t.Object(
-        {
-          status: t.UnionEnum([
-            "REJECTED",
-            "PENDING",
-            "READY",
-            "DELIVERED",
-            "NOT_PAID",
-            "COMPLETED",
-          ]),
-        },
-        { minProperties: 1 }
-      ),
+      body: t.Object({
+        status: t.UnionEnum([
+          "REJECTED",
+          "PENDING",
+          "READY",
+          "DELIVERED",
+          "NOT_PAID",
+          "COMPLETED",
+        ]),
+      }),
     }
   )
   .patch(
@@ -44,7 +41,7 @@ const ordersRoutes = new Elysia({ prefix: "/orders" })
       body: t.Object({}, { minProperties: 1 }),
     }
   )
-  .delete("/", ({ params: { id } }) => OrderController.delete(id), {
+  .delete("/:id", ({ params: { id } }) => OrderController.delete(id), {
     params: t.Object({
       id: t.Numeric(),
     }),

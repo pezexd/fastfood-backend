@@ -1,10 +1,17 @@
 import { NotFoundError } from "elysia";
 import db from "../../db";
 import dayjs from "dayjs";
+import { ItemBody } from "./model";
+import { randomUUIDv7 } from "bun";
 
+/**
+ * Controlador para gestionar las operaciones relacionadas con los ítems.
+ */
 export const ItemController = {
   /**
-   * Get items
+   * Obtiene una lista de ítems ordenados por nombre en orden descendente.
+   * Incluye los ingredientes de cada ítem.
+   *
    */
   async findMany() {
     try {
@@ -21,11 +28,11 @@ export const ItemController = {
 
       return items;
     } catch (e: unknown) {
-      console.error(`Error getting orders: ${e}`);
+      console.error(`Error getting items: ${e}`);
     }
   },
   /**
-   *  Get items with trends
+   * Obtiene las tendencias de los ítems basadas en las órdenes de los últimos 7 días.
    */
   async findTrends() {
     try {
@@ -94,6 +101,64 @@ export const ItemController = {
       return itemTrending;
     } catch (e: unknown) {
       console.error(`Error getting items trends: ${e}`);
+    }
+  },
+  /**
+   * Crea un nuevo ítem en la base de datos.
+   * Maneja la carga de archivos de imagen.
+   */
+  async create(body: ItemBody) {
+    try {
+      const ext = body.image.extension;
+      const baseDir = "files/items/";
+      const newFileName = `${baseDir}${randomUUIDv7()}${ext}`;
+
+      const fileBuffer = Buffer.from(body.image.encodedMedia, "base64");
+      const file = new File([fileBuffer], newFileName);
+
+      await Bun.write(newFileName, file);
+
+      const item = await db.item.create({
+        data: {
+          basePrice: body.basePrice,
+          description: body.description,
+          image: newFileName,
+          name: body.name,
+          preparationTime: body.preparationTime,
+          ingredients: {
+            create: body.ingredients.map(({ id, ingredientQuantity }) => ({
+              ingredient: { connect: { id } },
+              ingredientQuantity,
+            })),
+          },
+        },
+      });
+
+      return item;
+    } catch (e: unknown) {
+      console.error(`Error creating item: ${e}`);
+    }
+  },
+  /**
+   * Elimina un ítem de la base de datos por su ID.
+   */
+  async delete(itemId: number) {
+    try {
+      const item = await db.item.findUnique({
+        where: { id: itemId },
+      });
+
+      if (!item) {
+        throw new NotFoundError(`Item with ID ${itemId} not found`);
+      }
+
+      await db.item.delete({
+        where: { id: itemId },
+      });
+
+      return { message: "Item deleted successfully" };
+    } catch (e: unknown) {
+      console.error(`Error deleting item: ${e}`);
     }
   },
 };

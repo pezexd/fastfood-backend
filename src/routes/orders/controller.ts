@@ -2,6 +2,13 @@ import { NotFoundError } from "elysia";
 import db from "../../db";
 import { OrderModel } from "./model";
 
+/**
+ * Computes the total price and preparation time for an order.
+ *
+ * @returns {object} The order object with additional properties:
+ *  - orderTotal: The total price of the order.
+ *  - preparationTime: The total preparation time for the order.
+ */
 const computedOrder = (order: any) => {
   const orderTotal = order.items.reduce(
     (acc: number, curr: any) => (acc += curr.item.basePrice * curr.quantity),
@@ -21,7 +28,7 @@ const computedOrder = (order: any) => {
 
 export const OrderController = {
   /**
-   * Getting all orders
+   * Retrieves a list of orders from the database, optionally filtered by status.
    */
   async findMany(query: any) {
     try {
@@ -48,7 +55,7 @@ export const OrderController = {
     }
   },
   /**
-   * Getting a order by ID
+   * Finds a single order by its unique identifier.
    */
   async findOne(id: number) {
     try {
@@ -83,11 +90,6 @@ export const OrderController = {
               })),
             },
           }),
-          // additionalIngredients: {
-          //   create: item.additionalIngredients.map((a) => ({
-          //     ingredientId: a,
-          //   })),
-          // },
         })),
       };
 
@@ -98,7 +100,6 @@ export const OrderController = {
           items,
         },
       });
-      // return await db.order.create({ data: { title, content } });
     } catch (e: unknown) {
       console.error(`Error creating order: ${e}`);
     }

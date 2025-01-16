@@ -4,6 +4,7 @@ import { auth } from "./auth";
 import ordersRoutes from "./routes/orders";
 import itemsRoutes from "./routes/items";
 import ingredientRoutes from "./routes/ingredients";
+import reportsRoutes from "./routes/reports";
 
 const betterAuthView = (context: Context) => {
   const BETTER_AUTH_ACCEPT_METHODS = ["POST", "GET"];
@@ -47,6 +48,12 @@ const app = new Elysia()
   .group("/api", (app) => app.use(ordersRoutes))
   .group("/api", (app) => app.use(itemsRoutes))
   .group("/api", (app) => app.use(ingredientRoutes))
+  .group("/api", (app) => app.use(reportsRoutes))
+  .group("/files", (app) =>
+    app.get("*", async ({ path }) => {
+      return Bun.file(`./${path}`);
+    })
+  )
   .use(
     cors({
       origin: true,
